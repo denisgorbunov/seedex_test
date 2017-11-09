@@ -5,8 +5,8 @@ class UsersController < ApplicationController
     errors << 'NICKNAME_EMPTY' unless data['nickname']
     errors << 'NICKNAME_TAKEN' if User.find_by(nickname: data['nickname'])
     if errors.empty?
-      user = User.new(nickname: data['nickname'], last_online_at: Time.now)
-      if user.save
+      user = User.create(nickname: data['nickname'])
+      if user.valid?
         render json: {
           success: true
         }, status: 200
