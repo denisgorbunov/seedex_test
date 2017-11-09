@@ -22,7 +22,7 @@ class MessagesController < ApplicationController
     end
   end
 
-  def show
+  def dialog
     errors = []
     current_user = params['current_user_id']
     target_user = params['target_user_id']

@@ -18,4 +18,21 @@ class UsersController < ApplicationController
       }, status: 400
     end
   end
+
+  def index
+    users = []
+    User.all.map do |m|
+      attr = m.attributes.to_h
+      attr[:unread_messages] = getUnread(m.id).size
+      users << attr
+    end
+    render json: {
+        success: true,
+        users: users
+    }, status: 200
+  end
+
+  def getUnread(user)
+    Message.where(receiver_id: user, read: false)
+  end
 end
