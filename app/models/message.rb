@@ -1,3 +1,6 @@
 class Message < ApplicationRecord
-  scope :my, ->(sender, receiver) { where("sender_id = ? AND receiver_id = ? OR ", sender,receiver)}
+  scope :dialog, ->(sender, receiver) do
+    where('(sender_id= ? AND receiver_id= ?) OR (sender_id= ? AND receiver_id= ?)',
+          sender, receiver, receiver, sender).order(:id)
+  end
 end

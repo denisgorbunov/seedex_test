@@ -24,29 +24,35 @@ class MessagesController < ApplicationController
 
   def show
     errors = []
-    messages = []
-    errors << "CURRENT_USER_NOT_FOUND" unless User.find_by(id: params['current_user_id'])
-    errors << "TARGET_USER_NOT_FOUND" unless User.find_by(id: params['target_user_id'])
-    messages << Message.where(sender_id: params['target_user_id'], receiver_id: params['current_user_id'])
-    messages << Message.where(sender_id: params['current_user_id'], receiver_id: params['target_user_id'])
-    unread = Message.where(receiver_id: params['current_user_id'], read: false)
-    unread.each do |m|
-      m.update(read: true)
-      User.find(params['current_user_id']).update(last_online_at: Time.now)
-    end
-    if !messages.empty?
-      render json: {
-          success: true,
-          messages: messages
-      }, status: 200
+    current_user = params['current_user_id']
+    target_user = params['target_user_id']
+    errors << "CURRENT_USER_NOT_FOUND" unless User.find_by(id: current_user)
+    errors << "TARGET_USER_NOT_FOUND" unless User.find_by(id: target_user)
+    if errors.empty?
+      messages = Message.dialog(current_user, target_user)
+      errors << "NOT_FOUND" unless messages.nil?
+      unread = Message.where(receiver_id: current_user, read: false)
+      if not messages.empty?
+        unread.each do |m|
+          m.update(read: true)
+          User.find(current_user).update(last_online_at: Time.now)
+        end
+        render json: {
+            success: true,
+            messages: messages
+        }, status: 200
+      else
+        render json: {
+            success: false,
+            errors: errors
+        }, status: 404
+      end
     else
       render json: {
           success: false,
           errors: errors
-      }
+      }, status: 404
     end
   end
 end
-
-#TODO: переделать этот бред..
 
