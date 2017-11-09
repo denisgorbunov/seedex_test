@@ -25,6 +25,8 @@ class MessagesController < ApplicationController
   def show
     errors = []
     messages = []
+    errors << "CURRENT_USER_NOT_FOUND" unless User.find_by(id: params['current_user_id'])
+    errors << "TARGET_USER_NOT_FOUND" unless User.find_by(id: params['target_user_id'])
     messages << Message.where(sender_id: params['target_user_id'], receiver_id: params['current_user_id'])
     messages << Message.where(sender_id: params['current_user_id'], receiver_id: params['target_user_id'])
     unread = Message.where(receiver_id: params['current_user_id'], read: false)
@@ -40,7 +42,7 @@ class MessagesController < ApplicationController
     else
       render json: {
           success: false,
-          errors: ["CURRENT_USER_NOT_FOUND", "TARGET_USER_NOT_FOUND"]
+          errors: errors
       }
     end
   end
