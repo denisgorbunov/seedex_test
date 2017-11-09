@@ -21,14 +21,23 @@ class UsersController < ApplicationController
 
   def index
     users = []
+    sort1 = []
+    sort2 = []
+    sort3 = []
     User.all.map do |u|
       attr = u.attributes.to_h
       attr[:unread_messages] = u.income.unread.size
-      users << attr if attr[:unread_messages] > 0
-      users.sort_by! { |a| a[:last_online_at] }.reverse!
-    end
-    #users.sort_by! { |a| a[:last_online_at] }.reverse!
 
+      sort1 << attr if attr[:unread_messages] > 0
+      sort1.sort_by! { |a| a[:last_online_at] }
+
+      sort2 << attr if u[:last_online_at] > 1.days.ago
+      sort2.sort_by! { |a| a[:last_online_at] }.reverse!
+
+      sort3 << attr
+      sort3.sort_by! { |a| a[:created_at] }.reverse!
+    end
+    users << sort1 + sort2 + sort3
     render json: {
       success: true,
       users: users
